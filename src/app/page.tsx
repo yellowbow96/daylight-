@@ -33,6 +33,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { MusicPlayer } from '@/components/daylight/MusicPlayer';
 
 const MAX_MINUTES_IN_DAY = 16 * 60; // 16 hours
 const LOCAL_STORAGE_KEY_TASKS = 'daylight-tasks';
@@ -179,7 +180,7 @@ export default function Home() {
       <ProgressSection tasks={tasks} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-8">
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle>Plan Your Day</CardTitle>
@@ -216,6 +217,7 @@ export default function Home() {
               </div>
             </CardContent>
           </Card>
+           <MusicPlayer />
         </div>
         <div className="lg:col-span-2">
           <Card className="shadow-lg">
