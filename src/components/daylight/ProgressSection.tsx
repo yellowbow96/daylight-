@@ -26,6 +26,9 @@ export function ProgressSection({tasks}: ProgressSectionProps) {
     progress,
     timeLeft,
     progressColor,
+    completedTasks,
+    totalTasks,
+    completionPercentage,
   } = useMemo(() => {
     const total = tasks.reduce((sum, task) => sum + task.duration, 0);
     const completed = tasks
@@ -33,6 +36,10 @@ export function ProgressSection({tasks}: ProgressSectionProps) {
       .reduce((sum, task) => sum + task.duration, 0);
     const progressPercentage = total > 0 ? (completed / total) * 100 : 0;
     const remaining = total - completed;
+    const completedCount = tasks.filter(t => t.completed).length;
+    const totalCount = tasks.length;
+    const completionPercent =
+      totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
     // Transition from red (hue 0) to green (hue 120)
     const hue = Math.min(progressPercentage * 1.2, 120);
@@ -44,6 +51,9 @@ export function ProgressSection({tasks}: ProgressSectionProps) {
       progress: progressPercentage,
       timeLeft: remaining,
       progressColor: color,
+      completedTasks: completedCount,
+      totalTasks: totalCount,
+      completionPercentage: completionPercent,
     };
   }, [tasks]);
 
@@ -55,11 +65,25 @@ export function ProgressSection({tasks}: ProgressSectionProps) {
       <CardContent>
         <div className="space-y-4">
           <TaskProgressBar value={progress} indicatorColor={progressColor} />
-          <div className="flex justify-between font-medium text-muted-foreground">
-            <span>{formatDuration(completedDuration)} done</span>
-            <span className="text-primary font-semibold">
-              {formatDuration(timeLeft)} left
-            </span>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+            <div className="p-2 rounded-lg bg-secondary">
+              <div className="text-2xl font-bold">
+                {completedTasks} / {totalTasks}
+              </div>
+              <div className="text-sm text-muted-foreground">Tasks Done</div>
+            </div>
+            <div className="p-2 rounded-lg bg-secondary">
+              <div className="text-2xl font-bold">
+                {completionPercentage.toFixed(0)}%
+              </div>
+              <div className="text-sm text-muted-foreground">Completed</div>
+            </div>
+            <div className="p-2 rounded-lg bg-secondary">
+              <div className="text-2xl font-bold text-primary">
+                {formatDuration(timeLeft)}
+              </div>
+              <div className="text-sm text-muted-foreground">Time Left</div>
+            </div>
           </div>
         </div>
       </CardContent>
