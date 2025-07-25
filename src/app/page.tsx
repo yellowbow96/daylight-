@@ -34,6 +34,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { MusicPlayer } from '@/components/daylight/MusicPlayer';
+import { DayNightWidget } from '@/components/daylight/DayNightWidget';
 
 const MAX_MINUTES_IN_DAY = 16 * 60; // 16 hours
 const LOCAL_STORAGE_KEY_TASKS = 'daylight-tasks';
@@ -168,6 +169,7 @@ export default function Home() {
           </h1>
         </div>
         <div className="flex items-center gap-4">
+          <DayNightWidget />
           <Clock />
           <Button onClick={toggleTheme} variant="ghost" size="icon">
             <Sun className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
