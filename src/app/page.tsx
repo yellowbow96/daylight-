@@ -7,6 +7,8 @@ import {
   Save,
   Trash2,
   ListTodo,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 import type {Task} from '@/lib/types';
@@ -33,28 +35,49 @@ import {
 } from '@/components/ui/alert-dialog';
 
 const MAX_MINUTES_IN_DAY = 16 * 60; // 16 hours
-const LOCAL_STORAGE_KEY = 'daylight-tasks';
+const LOCAL_STORAGE_KEY_TASKS = 'daylight-tasks';
+const LOCAL_STORAGE_KEY_THEME = 'daylight-theme';
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isAddingTask, setIsAddingTask] = useState(false);
+  const [theme, setTheme] = useState('light');
   const {toast} = useToast();
 
   useEffect(() => {
     try {
-      const savedTasks = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const savedTasks = localStorage.getItem(LOCAL_STORAGE_KEY_TASKS);
       if (savedTasks) {
         setTasks(JSON.parse(savedTasks));
       }
+      const savedTheme = localStorage.getItem(LOCAL_STORAGE_KEY_THEME);
+      if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+        setTheme(savedTheme);
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setTheme('dark');
+      }
     } catch (error) {
-      console.error('Failed to load tasks from local storage:', error);
+      console.error('Failed to load from local storage:', error);
       toast({
         title: 'Error',
-        description: 'Could not load saved tasks.',
+        description: 'Could not load saved settings.',
         variant: 'destructive',
       });
     }
   }, [toast]);
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem(LOCAL_STORAGE_KEY_THEME, theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
 
   const handleAddTask = useCallback(
     async (taskDescription: string) => {
@@ -115,7 +138,7 @@ export default function Home() {
 
   const handleSaveTasks = useCallback(() => {
     try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tasks));
+      localStorage.setItem(LOCAL_STORAGE_KEY_TASKS, JSON.stringify(tasks));
       toast({
         title: 'Tasks Saved',
         description: 'Your task list has been saved successfully.',
@@ -143,7 +166,14 @@ export default function Home() {
             Daylight
           </h1>
         </div>
-        <Clock />
+        <div className="flex items-center gap-4">
+          <Clock />
+          <Button onClick={toggleTheme} variant="ghost" size="icon">
+            <Sun className="h-6 w-6 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-6 w-6 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+        </div>
       </div>
 
       <ProgressSection tasks={tasks} />
