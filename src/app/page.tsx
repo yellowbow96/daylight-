@@ -1,15 +1,7 @@
 'use client';
 
 import {useState, useEffect, useCallback} from 'react';
-import {
-  FolderOpen,
-  LoaderCircle,
-  Save,
-  Trash2,
-  ListTodo,
-  Sun,
-  Moon,
-} from 'lucide-react';
+import {ListTodo, Moon, Save, Sun, Trash2} from 'lucide-react';
 
 import type {Task} from '@/lib/types';
 import {estimateTaskDuration} from '@/ai/flows/estimate-task-duration';
@@ -33,8 +25,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { MusicPlayer } from '@/components/daylight/MusicPlayer';
-import { DayNightWidget } from '@/components/daylight/DayNightWidget';
+import {MusicPlayer} from '@/components/daylight/MusicPlayer';
+import {DayNightWidget} from '@/components/daylight/DayNightWidget';
 
 const MAX_MINUTES_IN_DAY = 16 * 60; // 16 hours
 const LOCAL_STORAGE_KEY_TASKS = 'daylight-tasks';
@@ -82,20 +74,29 @@ export default function Home() {
   };
 
   const handleAddTask = useCallback(
-    async (taskDescription: string) => {
+    async (taskDescription: string, duration?: number) => {
       if (!taskDescription.trim()) return;
 
       setIsAddingTask(true);
       try {
+        let estimatedDurationMinutes = duration;
+        if (typeof estimatedDurationMinutes !== 'number' || estimatedDurationMinutes <= 0) {
+          const {estimatedDurationMinutes: aiDuration} =
+            await estimateTaskDuration({
+              taskDescription,
+            });
+            estimatedDurationMinutes = aiDuration;
+        }
+
         const currentTotalDuration = tasks.reduce(
           (sum, task) => sum + task.duration,
           0
         );
-        const {estimatedDurationMinutes} = await estimateTaskDuration({
-          taskDescription,
-        });
 
-        if (currentTotalDuration + estimatedDurationMinutes > MAX_MINUTES_IN_DAY) {
+        if (
+          currentTotalDuration + estimatedDurationMinutes >
+          MAX_MINUTES_IN_DAY
+        ) {
           toast({
             title: 'Time limit exceeded!',
             description:
@@ -190,13 +191,19 @@ export default function Home() {
             <CardContent>
               <AddTaskForm onAddTask={handleAddTask} isLoading={isAddingTask} />
               <div className="mt-4 flex flex-wrap gap-2">
-                <Button onClick={handleSaveTasks} className="flex-grow sm:flex-grow-0">
+                <Button
+                  onClick={handleSaveTasks}
+                  className="flex-grow sm:flex-grow-0"
+                >
                   <Save />
                   Save List
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" className="flex-grow sm:flex-grow-0">
+                    <Button
+                      variant="destructive"
+                      className="flex-grow sm:flex-grow-0"
+                    >
                       <Trash2 /> Clear All
                     </Button>
                   </AlertDialogTrigger>
@@ -219,7 +226,7 @@ export default function Home() {
               </div>
             </CardContent>
           </Card>
-           <MusicPlayer />
+          <MusicPlayer />
         </div>
         <div className="lg:col-span-2">
           <Card className="shadow-lg">
